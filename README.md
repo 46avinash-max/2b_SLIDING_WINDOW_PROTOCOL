@@ -32,25 +32,30 @@ s.close()
 ~~~
 ## CLIENT
 ~~~
-import socket
-s = socket.socket()
-s.bind(('localhost', 9999))
-s.listen(1)
-print("Server listening...")
-conn, addr = s.accept()
-print(f"Connected to {addr}")
+ import socket
+c = socket.socket()
+c.connect(('localhost', 9999))
 
+size = int(input("Enter number of frames to send: "))
+l = list(range(size))  
+print("Total frames to send:", len(l))
+s = int(input("Enter Window Size: "))
+
+i = 0
 while True:
-    frames = conn.recv(1024).decode()
-    if not frames:
-        break
+    while i < len(l):
+        st = i + s
+        frames_to_send = l[i:st]  
+        print(f"Sending frames: {frames_to_send}")
+        c.send(str(frames_to_send).encode())  
 
-    print(f"Received frames: {frames}")
-    ack_message = f"ACK for frames: {frames}"
-    conn.send(ack_message.encode())
+        ack = c.recv(1024).decode()  
+        if ack:
+            print(f"Acknowledgment received: {ack}")
+            i += s  
 
-conn.close()  
-s.close()
+    break
+c.close()
 ~~~
 ## OUTPUT
 ## SERVER
